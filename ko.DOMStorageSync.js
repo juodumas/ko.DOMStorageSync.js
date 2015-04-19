@@ -18,11 +18,16 @@
   }
 
   ['localStorage', 'sessionStorage'].forEach(function(storage) {
-    ko.extenders[storage] = function(observable, key) {
-      var stored_json = window[storage].getItem(key);
+    ko.extenders[storage] = function(observable, options) {
+      var key = typeof options == 'string' ? options : options.key,
+          data = window[storage].getItem(key);
 
-      if (stored_json) {
-        observable(JSON.parse(stored_json));
+      if (data) {
+        data = JSON.parse(data);
+        if (options.beforeAdd) {
+          data = options.beforeAdd(data);
+        }
+        observable(data);
       }
 
       observable.subscribe(function(value) {
